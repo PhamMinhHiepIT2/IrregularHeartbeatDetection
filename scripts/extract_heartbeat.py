@@ -15,6 +15,7 @@ def process_signal(signal_path):
 
     # uncomment to save images of beats
     signal_api.extractBeatsFromPatient(signal_path, ann)
+    print("Processed completely 1 signal")
 
 
 if __name__ == '__main__':
@@ -29,10 +30,9 @@ if __name__ == '__main__':
     signal_files = natsort.natsorted(signal_files)
 
     # extract and save beats from file provided
-    with ProcessPoolExecutor(7) as executor:
+    with ProcessPoolExecutor(12) as executor:
         for signal_file in signal_files:
-            print(signal_file)
-            signal_path = signal_dir + '/' + \
+            signal_path = signal_dir + \
                 directory_structure.removeFileExtension(signal_file)
 
             # get annotation data frame of signal file

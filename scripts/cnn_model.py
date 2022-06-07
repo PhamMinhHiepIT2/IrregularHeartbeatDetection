@@ -1,11 +1,11 @@
-# Implmentation of AlexNet model taken from 
+# Implmentation of AlexNet model taken from
 # https://www.mydatahack.com/building-alexnet-with-keras/
 # script that reads data, creates model and trains it
 
 from keras.models import Sequential
 from keras.layers import Dense, Activation, Dropout, Flatten,\
     Conv2D, MaxPooling2D
-from keras.layers.normalization import BatchNormalization
+from tensorflow.keras.layers import BatchNormalization
 import numpy as np
 import directory_structure
 import os
@@ -14,13 +14,14 @@ import pandas as pd
 from sklearn.model_selection import train_test_split
 import keras
 from collections import deque
-from keras.utils import multi_gpu_model
-from keras.callbacks import EarlyStopping
+from keras.callbacks import EarlyStopping, ReduceLROnPlateau, ModelCheckpoint
+import tensorflow as tf
+import resnet50
 
 # classes model needs to learn to classify
 CLASSES_TO_CHECK = ['L', 'N', 'V', 'A', 'R']
 NUMBER_OF_CLASSES = len(CLASSES_TO_CHECK)
-IMAGES_TO_TRAIN = 2450
+IMAGES_TO_TRAIN = 5000
 
 # removing warning for tensorflow about AVX support
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
@@ -340,7 +341,7 @@ def createModel(model_name):
         model.add(BatchNormalization())
 
         # -----------------------6th Convolutional Layer----------------------------
-        model.add(Conv2D(filters=500, kernel_size=(
+        model.add(Conv2D(filters=512, kernel_size=(
             3, 3), strides=(1, 1), padding='valid'))
         model.add(Activation('relu'))
         # Pooling
@@ -386,38 +387,55 @@ if __name__ == '__main__':
     # (2) GET DATA
     df = getSignalDataFrame()
 
-    X_train, X_test, y_train, y_test = trainAndTestSplit(df, 0.15)
+    X_train, X_test, y_train, y_test = trainAndTestSplit(df, 0.2)
 
     # (3) CREATE SEQUENTIAL MODEL
-    model = createModel('Alexnet')
+    # model = createModel('Novelnet')
 
-   # uncomment to do computation on multiple gpus
-    #parallel_model = multi_gpu_model(model, gpus=2)
-    parallel_model = model
+    # # uncomment to do computation on multiple gpus
+    # # parallel_model = multi_gpu_model(model, gpus=2)
+    # parallel_model = model
 
-    # (4) COMPILE MODEL
-    parallel_model.compile(
-        loss='categorical_crossentropy',
-        optimizer='adam',
-        metrics=['accuracy']
-    )
+    # # (4) COMPILE MODEL
+    # parallel_model.compile(
+    #     loss='categorical_crossentropy',
+    #     optimizer='adam',
+    #     metrics=['accuracy']
+    # )
 
-    # (5) TRAIN
-    history = parallel_model.fit(
-        X_train,
-        y_train,
-        batch_size=64,
-        epochs=150,
-        verbose=1,
-        validation_data=(X_test, y_test),
-        shuffle=True,
-    )
+    # callback = EarlyStopping(monitor='val_loss', patience=3)
+    # reduce_lr_loss = ReduceLROnPlateau(
+    #     patience=7, verbose=0, epsilon=1e-4, mode='min')
+    # model_ckp = ModelCheckpoint("model.h5", save_best_only=True, mode='min')
 
-    # (6) PREDICTION
-    predictions = parallel_model.predict(X_test)
-    score = parallel_model.evaluate(X_test, y_test, verbose=0)
+    # # (5) TRAIN
+    # history = parallel_model.fit(
+    #     X_train,
+    #     y_train,
+    #     batch_size=64,
+    #     epochs=30,
+    #     verbose=1,
+    #     validation_data=(X_test, y_test),
+    #     shuffle=True,
+    #     callbacks=[callback, reduce_lr_loss, model_ckp],
+    #     use_multiprocessing=True
+    # )
+
+    # # (6) PREDICTION
+    # predictions = parallel_model.predict(X_test)
+    # score = parallel_model.evaluate(X_test, y_test, verbose=0)
+
+    # printTestMetrics(score)
+
+    # # (7) SAVE TESTS + WEIGHTS
+    # saveMetricsAndWeights(score, parallel_model)
+
+    resnet50_model = resnet50.resnet50(
+        X_train, y_train, X_test, y_test, batch_size=64, epochs=30, num_classes=5, output_file="resnet50.h5")
+
+    predictions = resnet50_model.predict(X_test)
+    score = resnet50_model.evaluate(X_test, y_test, verbose=0)
 
     printTestMetrics(score)
 
-    # (7) SAVE TESTS + WEIGHTS
-    saveMetricsAndWeights(score, parallel_model)
+    saveMetricsAndWeights(score, resnet50_model)

@@ -72,7 +72,7 @@ def getWriteDirectory(directory_name, subdirectory_name):
             wr_dir (str): path of directory to write data to
     '''
 
-    if subdirectory_name == None:
+    if subdirectory_name is None:
         wr_dir = os.getcwd() + '/../../' + directory_name + '/'
     else:
         if subdirectory_name == '/':
@@ -80,7 +80,7 @@ def getWriteDirectory(directory_name, subdirectory_name):
         else:
             wr_dir = os.getcwd() + '/../../' + directory_name + \
                 '/' + subdirectory_name + '/'
-
+    print(wr_dir)
     # if dir does not exist make new one
     if not os.path.exists(wr_dir):
         os.mkdir(wr_dir)

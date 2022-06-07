@@ -33,7 +33,7 @@ def resnet50(train_data, train_labels, test_data, test_labels, batch_size, epoch
     predictions = Dense(num_classes, activation="softmax")(x)
 
     # creating the final model
-    model_final = Model(input=model.input, output=predictions)
+    model_final = Model(inputs=model.input, outputs=predictions)
 
     # compile the model
     model_final.compile(loss="categorical_crossentropy", optimizer=optimizers.SGD(
@@ -47,3 +47,5 @@ def resnet50(train_data, train_labels, test_data, test_labels, batch_size, epoch
 
     model_final.fit(train_data, train_labels, batch_size=batch_size,
                     epochs=epochs, shuffle=True, validation_data=(test_data, test_labels), callbacks=[checkpoint, early])
+
+    return model_final
