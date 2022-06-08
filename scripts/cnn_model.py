@@ -430,12 +430,15 @@ if __name__ == '__main__':
     # # (7) SAVE TESTS + WEIGHTS
     # saveMetricsAndWeights(score, parallel_model)
 
-    resnet50_model = resnet50.resnet50(
-        X_train, y_train, X_test, y_test, batch_size=64, epochs=30, num_classes=5, output_file="resnet50.h5")
+    # resnet50_model = resnet50.resnet50(
+    #     X_train, y_train, X_test, y_test, batch_size=64, epochs=20, num_classes=5, output_file="resnet50.h5")
 
-    predictions = resnet50_model.predict(X_test)
-    score = resnet50_model.evaluate(X_test, y_test, verbose=0)
+    resnet152_model = resnet50.resnet50(
+        X_train, y_train, X_test, y_test, batch_size=64, epochs=20, num_classes=5, output_file="resnet152.h5")
+
+    predictions = resnet152_model.predict(X_test)
+    score = resnet152_model.evaluate(X_test, y_test, verbose=0)
 
     printTestMetrics(score)
 
-    saveMetricsAndWeights(score, resnet50_model)
+    saveMetricsAndWeights(score, resnet152_model)
