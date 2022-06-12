@@ -6,7 +6,7 @@ import natsort  # module used to sort file names
 from concurrent.futures import ProcessPoolExecutor
 
 import signal_api
-import directory_structure
+import utils
 from constant import DATA_DIR
 
 
@@ -28,7 +28,7 @@ if __name__ == '__main__':
     cpu = args.cpu
 
     # get all .hea and .dat files (respectively)
-    signal_files = directory_structure.filesInDirectory('.hea', DATA_DIR)
+    signal_files = utils.filesInDirectory('.hea', DATA_DIR)
 
     # sort file names in ascending order in list
     signal_files = natsort.natsorted(signal_files)
@@ -37,7 +37,7 @@ if __name__ == '__main__':
     with ProcessPoolExecutor(cpu) as executor:
         for signal_file in signal_files:
             signal_path = DATA_DIR + \
-                directory_structure.removeFileExtension(signal_file)
+                utils.removeFileExtension(signal_file)
 
             # get annotation data frame of signal file
             executor.submit(process_signal, signal_path)

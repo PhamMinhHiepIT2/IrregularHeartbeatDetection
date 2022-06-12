@@ -5,7 +5,7 @@ import re
 import wfdb
 import matplotlib.pyplot as plt
 from PIL import Image
-import directory_structure
+import utils
 from constant import *
 
 
@@ -48,7 +48,7 @@ def writeSingleBeat(file_path, beat_start, beat_end, beat_number, beat_type):
     '''
 
     # save directory where beats need to be written
-    beat_wr_dir = directory_structure.getWriteDirectory(WRITE_DIR, beat_type)
+    beat_wr_dir = utils.getWriteDirectory(WRITE_DIR, beat_type)
 
     # get signal and fields of specified file_path
     signal, fields = getSignalInfo(file_path, beat_start, beat_end)
@@ -81,7 +81,7 @@ def saveSignal(signal, beat_number, wr_dir, file_path):
     # convert grayscale and overwrite
     img = Image.open(wr_dir + '/image_' + file_number + '_' +
                      str(beat_number) + '.png').convert('LA')
-    img = img.resize((224, 224))
+    img = img.resize((IMAGE_HEIGHT, IMAGE_WIDTH))
     img.save(wr_dir + '/image_' + file_number +
              '_' + str(beat_number) + '.png')
 
@@ -116,7 +116,6 @@ def extractBeatsFromPatient(file_path, ann):
     # get list of locations where annotations are
     ann_locs = ann.sample
 
-    print("File path: ", file_path)
     # uncomment to extract all heartbeats
     NUM_HEARTBEATS_TO_EXTRACT = len(ann_locs) - 1
 
