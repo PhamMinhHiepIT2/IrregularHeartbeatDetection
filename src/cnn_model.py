@@ -14,8 +14,6 @@ import pandas as pd
 from sklearn.model_selection import train_test_split
 import keras
 from collections import deque
-from keras.callbacks import EarlyStopping, ReduceLROnPlateau, ModelCheckpoint
-import tensorflow as tf
 import resnet50
 
 # classes model needs to learn to classify

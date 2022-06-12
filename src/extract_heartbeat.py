@@ -25,12 +25,14 @@ if __name__ == '__main__':
 
     args = args.parse_args()
     cpu = args.cpu
+    print(cpu)
 
-    # find directory where data is
-    signal_dir = directory_structure.getReadDirectory('mit-bih_waveform')
+    DATA_DIR = 'data/mit-bih_waveform/'
 
     # get all .hea and .dat files (respectively)
-    signal_files = directory_structure.filesInDirectory('.hea', signal_dir)
+    signal_files = directory_structure.filesInDirectory('.hea', DATA_DIR)
+
+    print(signal_files)
 
     # sort file names in ascending order in list
     signal_files = natsort.natsorted(signal_files)
@@ -38,8 +40,9 @@ if __name__ == '__main__':
     # extract and save beats from file provided
     with ProcessPoolExecutor(cpu) as executor:
         for signal_file in signal_files:
-            signal_path = signal_dir + \
+            signal_path = DATA_DIR + \
                 directory_structure.removeFileExtension(signal_file)
+            print(signal_path)
 
             # get annotation data frame of signal file
             executor.submit(process_signal, signal_path)

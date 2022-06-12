@@ -6,21 +6,6 @@ import os
 import re
 
 
-def chooseDirectoryFromRoot(directory):
-    '''
-    take directory to go to from the root directory of project 
-
-    Args:
-            directory (str): name of directory user wants to go to
-
-    '''
-    # go to root directory of project from current directory
-    os.chdir("..")
-
-    # go to directory specified
-    os.chdir(directory)
-
-
 def filesInDirectory(extension, directory):
     '''
     return the list of files in the directory with a specific extension
@@ -73,14 +58,13 @@ def getWriteDirectory(directory_name, subdirectory_name):
     '''
 
     if subdirectory_name is None:
-        wr_dir = os.getcwd() + '/../../' + directory_name + '/'
+        wr_dir = os.getcwd() + '/' + directory_name + '/'
     else:
         if subdirectory_name == '/':
-            wr_dir = os.getcwd() + '/../../' + directory_name + '/' + '_' + '/'
+            wr_dir = os.getcwd() + '/' + directory_name + '/' + '_' + '/'
         else:
-            wr_dir = os.getcwd() + '/../../' + directory_name + \
+            wr_dir = os.getcwd() + '/' + directory_name + \
                 '/' + subdirectory_name + '/'
-    print(wr_dir)
     # if dir does not exist make new one
     if not os.path.exists(wr_dir):
         os.mkdir(wr_dir)
@@ -88,36 +72,6 @@ def getWriteDirectory(directory_name, subdirectory_name):
     else:
         # return directory specified
         return wr_dir
-
-
-def getReadDirectory(directory_name):
-    '''
-    get the path of passed in directory name from root of project
-
-    Args:
-            directory_name (str): name of directory to read from
-
-    Returns:
-            rd_dir (str): path of directory to read data from
-    '''
-
-    rd_dir = os.getcwd() + '/../' + directory_name + '/'
-    return rd_dir
-
-
-def extractNumFromFile(file_name):
-    '''
-    get maximum number from file name passed in
-
-    Args;
-            file_name (str): string to extract number from
-
-    Returns:
-            (str): max number from file name 
-    '''
-    numbers = re.findall('\d+', file_name)
-    numbers = list(map(int, numbers))
-    return str(numbers[0])
 
 
 def getAllSubfoldersOfFolder(path):
@@ -131,7 +85,3 @@ def getAllSubfoldersOfFolder(path):
             (list): list of strings with all folder names 
     '''
     return [dI for dI in os.listdir(path) if os.path.isdir(os.path.join(path, dI))]
-
-
-def getAllElementsInFolder(path):
-    return os.listdir(path)
