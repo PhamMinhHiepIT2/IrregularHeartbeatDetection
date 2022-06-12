@@ -19,32 +19,37 @@ Git-LFS can be easily installed using the command `git lfs install`, and the lfs
 ## Directory Structure
 ```
 ├── README.md
-├── mit-bih_database
-│   ├── 100.csv
-│   ├── 100annotations.txt
-│        .
-│        .
-│        .
-│   ├── 234.csv
-│   └── 234annotations.txt
-├── mit-bih_waveform
-│   ├── 100.atr
-│   ├── 100.dat
-│   ├── 100.hea
-│        .
-│        .
-│        .
-│   ├── 234.atr
-│   ├── 234.dat
-│   └── 234.hea
-└── scripts
-    ├── _pycache_
-    ├── cnn_model.py
-    ├── directory_structure.py
+├── data
+│   ├── mit-bih_database
+│   │   ├── 100.csv
+│   │   ├── 100annotations.txt
+│   │   ├── 101.csv
+│   │   ├── 101annotations.txt
+│   │   ├── 102.csv
+│   │   ...
+│   └── mit-bih_waveform
+│       ├── 100.atr
+│       ├── 100.dat
+│       ├── 100.hea
+│       ├── 101.atr
+│       ├── 101.dat
+│       ├── 101.hea
+│       ├── 102-0.atr
+│       ├── 102.atr
+│       ├── 102.dat
+│       ├── 102.hea
+|       | ...
+├── references.md
+├── requirements.txt
+└── src
+    ├── constant.py
     ├── extract_heartbeat.py
+    ├── infer.py
+    ├── main.py
+    ├── model.py
+    ├── resnet50.py
     ├── signal_api.py
-    └── test.py
+    └── utils.py
 ```
 
-## Usage Instructions
-Refer to the [Wiki](https://github.com/abdurmasood/Irregular-Heartbeat-Detection-using-ML/wiki) for instructions on how to train and run the model.
+Some references: [REFERENCES](./references.md)
