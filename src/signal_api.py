@@ -6,13 +6,7 @@ import wfdb
 import matplotlib.pyplot as plt
 from PIL import Image
 import directory_structure
-
-
-# number of heartbeats to extract
-NUM_HEARTBEATS_TO_EXTRACT = 1
-BEAT_START_OFFSET = 100
-BEAT_END_OFFSET = 100
-WRITE_DIR = 'beat_write_dir'
+from constant import *
 
 
 def getSignalInfo(file_path, sample_from, sample_to):

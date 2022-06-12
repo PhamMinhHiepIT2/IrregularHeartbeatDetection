@@ -3,7 +3,6 @@
 # related to reading and writin directories and removing file extensions.
 
 import os
-import re
 
 
 def filesInDirectory(extension, directory):
@@ -65,13 +64,11 @@ def getWriteDirectory(directory_name, subdirectory_name):
         else:
             wr_dir = os.getcwd() + '/' + directory_name + \
                 '/' + subdirectory_name + '/'
-    # if dir does not exist make new one
-    if not os.path.exists(wr_dir):
-        os.mkdir(wr_dir)
-        return wr_dir
-    else:
-        # return directory specified
-        return wr_dir
+
+    print("Writing to directory: " + wr_dir)
+
+    os.makedirs(wr_dir, exist_ok=True)
+    return wr_dir
 
 
 def getAllSubfoldersOfFolder(path):
