@@ -152,13 +152,12 @@ def getSignalDataFrame():
                 (dataframe): dataframe contatining image information 
         '''
     # get paths for where signals are present
-    signal_path = getWriteDirectory('beat_write_dir', None)
+    signal_path = getWriteDirectory(WRITE_DIR, None)
 
     # create dataframe
     df = pd.DataFrame(columns=['Signal ID', 'Signal', 'Type'])
 
-    arrhythmia_classes = getAllSubfoldersOfFolder(
-        signal_path)
+    arrhythmia_classes = getAllSubfoldersOfFolder(signal_path)
 
     image_paths = deque()
     image_ids = deque()

@@ -4,8 +4,8 @@ from keras.layers import Flatten, Dense
 from keras.callbacks import ModelCheckpoint, EarlyStopping, TensorBoard
 from keras.layers import Dense, Activation, Dropout, Flatten,\
     Conv2D, MaxPooling2D
-from keras.layers.normalization import BatchNormalization
 
+from tensorflow.keras.layers import BatchNormalization
 
 from constant import NUMBER_OF_CLASSES, IMAGE_HEIGHT, IMAGE_WIDTH
 from utils import printTestMetrics, saveMetricsAndWeights
@@ -58,9 +58,9 @@ class ClassificationModel:
         model_final.compile(loss="categorical_crossentropy", optimizer=optimizers.SGD(
             lr=0.0001, momentum=0.9), metrics=["accuracy"])
 
-        model_final.fit(self.train_data, self.train_labels, batch_size=self.batch_size,
-                        epochs=self.epochs, shuffle=True, validation_data=(self.test_data, self.test_labels),
-                        callbacks=[self.checkpoint, self.early, self.tbCallBack])
+        model_final.fit(self.train_data, self.train_label, batch_size=self.batch_size,
+                        epochs=self.epochs, shuffle=True, validation_data=(self.test_data, self.test_label),
+                        callbacks=[self.check_point, self.early, self.tbCallBack])
 
         return model_final
 
@@ -154,7 +154,7 @@ class ClassificationModel:
             verbose=1,
             validation_data=(self.test_data, self.test_label),
             shuffle=True,
-            callbacks=[self.checkpoint, self.early, self.tbCallBack]
+            callbacks=[self.check_point, self.early, self.tbCallBack]
         )
 
     def evaluate(self, model):

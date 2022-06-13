@@ -5,7 +5,7 @@
 import os
 import resnet50
 
-from constant import *
+from constant import NUMBER_OF_CLASSES, IMAGE_HEIGHT, IMAGE_WIDTH
 from utils import getSignalDataFrame, trainAndTestSplit
 from model import ClassificationModel
 # removing warning for tensorflow about AVX support
