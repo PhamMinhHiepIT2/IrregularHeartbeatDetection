@@ -27,7 +27,7 @@ IMAGES_TO_TRAIN = 5000
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
 
-def saveMetricsAndWeights(score, model):
+def saveMetricsAndWeights(score, model, metric_name, model_name):
     '''
     Save metric and weight data in specific folders
 
@@ -47,16 +47,16 @@ def saveMetricsAndWeights(score, model):
     metrics_path = directory_structure.getWriteDirectory(
         'testing', 'accuracy_metrics')
 
-    if (len(directory_structure.filesInDirectory('.npy', metrics_path)) == 0):
+    if (len(directory_structure.filesInDirectory(metric_name, metrics_path)) == 0):
         # create text file with placeholder accuracy value (i.e 0)
-        np.save(metrics_path + 'metrics.npy', [0])
-        model.save(weights_path + 'my_model.h5')
+        np.save(metrics_path + metric_name, [0])
+        model.save(weights_path + model_name)
         del model
     else:
-        highest_acc = np.load(metrics_path + 'metrics.npy')[0]
+        highest_acc = np.load(metrics_path + metric_name)[0]
         if (current_acc > highest_acc):
-            np.save(metrics_path + 'metrics.npy', [current_acc])
-            model.save(weights_path + 'my_model.h5')
+            np.save(metrics_path + metric_name, [current_acc])
+            model.save(weights_path + model_name)
             del model
             print('\nAccuracy Increase: ' +
                   str((current_acc - highest_acc)*100) + '%')
@@ -433,12 +433,37 @@ if __name__ == '__main__':
     # resnet50_model = resnet50.resnet50(
     #     X_train, y_train, X_test, y_test, batch_size=64, epochs=20, num_classes=5, output_file="resnet50.h5")
 
-    resnet152_model = resnet50.resnet50(
+    # RESNET152 model
+    # resnet152_model = resnet50.resnet152(
+    #     X_train, y_train, X_test, y_test, batch_size=64, epochs=20, num_classes=5, output_file="resnet152.h5")
+
+    # predictions = resnet152_model.predict(X_test)
+    # score = resnet152_model.evaluate(X_test, y_test, verbose=0)
+
+    # printTestMetrics(score)
+
+    # saveMetricsAndWeights(score, resnet152_model,
+    #                       "resnet152.npy", "resnet152.h5")
+
+    # VGG16 model
+
+    vgg16_model = resnet50.vgg16(
         X_train, y_train, X_test, y_test, batch_size=64, epochs=20, num_classes=5, output_file="resnet152.h5")
 
-    predictions = resnet152_model.predict(X_test)
-    score = resnet152_model.evaluate(X_test, y_test, verbose=0)
+    predictions = vgg16_model.predict(X_test)
+    score = vgg16_model.evaluate(X_test, y_test, verbose=0)
 
     printTestMetrics(score)
 
-    saveMetricsAndWeights(score, resnet152_model)
+    saveMetricsAndWeights(score, vgg16_model, "vgg16.npy", "vgg16.h5")
+
+    # VGG19 model
+    vgg19_model = resnet50.vgg19(
+        X_train, y_train, X_test, y_test, batch_size=64, epochs=20, num_classes=5, output_file="resnet152.h5")
+
+    predictions = vgg19_model.predict(X_test)
+    score = vgg19_model.evaluate(X_test, y_test, verbose=0)
+
+    printTestMetrics(score)
+
+    saveMetricsAndWeights(score, vgg19_model, "vgg19.npy", "vgg19.h5")

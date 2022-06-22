@@ -83,7 +83,7 @@ def getWriteDirectory(directory_name, subdirectory_name):
     print(wr_dir)
     # if dir does not exist make new one
     if not os.path.exists(wr_dir):
-        os.mkdir(wr_dir)
+        os.makedirs(wr_dir, exist_ok=True)
         return wr_dir
     else:
         # return directory specified
