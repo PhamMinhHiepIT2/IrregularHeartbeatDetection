@@ -1,3 +1,10 @@
-version https://git-lfs.github.com/spec/v1
-oid sha256:7caf57f4566cc13e473492a34d7f828e1d0a6cf728f2e9a34eda9ab7152f7534
-size 81
+keras
+pandas
+opencv-python
+numpy
+wfdb
+natsort
+Pillow
+scikit-learn
+fastapi
+uvicorn
