@@ -2,11 +2,12 @@ import numpy as np
 import keras
 import cv2
 import pandas as pd
+import os
+import re
 from collections import deque
 from sklearn.model_selection import train_test_split
 
 
-import directory_structure
 from constants import NUMBER_OF_CLASSES, IMAGES_TO_TRAIN, CLASSES_TO_CHECK
 
 
@@ -26,12 +27,12 @@ def getSignalDataFrame():
                 (dataframe): dataframe contatining image information 
         '''
     # get paths for where signals are present
-    signal_path = directory_structure.getWriteDirectory('beat_write_dir', None)
+    signal_path = get_write_dir('beat_write_dir', None)
 
     # create dataframe
     df = pd.DataFrame(columns=['Signal ID', 'Signal', 'Type'])
 
-    arrhythmia_classes = directory_structure.getAllSubfoldersOfFolder(
+    arrhythmia_classes = getAllSubfoldersOfFolder(
         signal_path)
 
     image_paths = deque()
@@ -42,10 +43,10 @@ def getSignalDataFrame():
     # get path for each image in classification folders
     for classification in arrhythmia_classes:
         classification_path = ''.join([signal_path, classification])
-        image_list = directory_structure.filesInDirectory(
+        image_list = files_in_dir(
             '.png', classification_path)
         for beat_id in image_list:
-            image_ids.append(directory_structure.removeFileExtension(beat_id))
+            image_ids.append(remove_extension(beat_id))
             class_types.append(classification)
             image_paths.append(''.join([classification_path, '/', beat_id]))
 
@@ -146,3 +147,99 @@ def trainAndTestSplit(df, size_of_test_data):
         X_train, X_test, y_train, y_test)
 
     return X_train, X_test, y_train, y_test
+
+
+def files_in_dir(extension, directory):
+    '''
+    return the list of files in the directory with a specific extension
+
+    Args:
+            extension (str): file type to get
+
+            directory (str): path of where files are present
+
+    Returns:
+            l (list): list of file names with extension (in current directory)
+    '''
+    l = []
+
+    # get all file names in current directory
+    file_names = os.listdir(directory)
+
+    for file in file_names:
+        if file.endswith(extension):
+            l.append(file)
+
+    return l
+
+
+def remove_extension(file):
+    '''
+    remove extension of file passed in as a string
+
+    Args:
+            file (str): name of file with extension
+
+    Returns:
+            (str): name of file without extension
+    '''
+    return os.path.splitext(file)[0]
+
+
+def get_write_dir(directory_name, subdirectory_name):
+    '''
+    get path of directory name specified where information needs
+    to be written to (subdirectory specification is optional)
+
+    Args:
+            directory_name (str): name of directory to read from
+
+            subdirectory (str): subdirectory of directory specified
+
+    Returns:
+            wr_dir (str): path of directory to write data to
+    '''
+
+    if subdirectory_name is None:
+        wr_dir = os.getcwd() + '/../' + directory_name + '/'
+    else:
+        if subdirectory_name == '/':
+            wr_dir = os.getcwd() + '/../' + directory_name + '/' + '_' + '/'
+        else:
+            wr_dir = os.getcwd() + '/../' + directory_name + \
+                '/' + subdirectory_name + '/'
+    # if dir does not exist make new one
+    if not os.path.exists(wr_dir):
+        os.makedirs(wr_dir, exist_ok=True)
+        return wr_dir
+    else:
+        # return directory specified
+        return wr_dir
+
+
+def get_num_from_file(file_name):
+    '''
+    get maximum number from file name passed in
+
+    Args;
+            file_name (str): string to extract number from
+
+    Returns:
+            (str): max number from file name 
+    '''
+    numbers = re.findall('\d+', file_name)
+    numbers = list(map(int, numbers))
+    return str(numbers[0])
+
+
+def get_all_subfolders(parent_dir):
+    '''
+    get all folders in the path specified
+
+    Args;
+            parent_dir (str): path where files are
+
+    Returns:
+            (list): list of strings with all folder names 
+    '''
+    return [dI for dI in os.listdir(parent_dir) if os.path.isdir(os.path.join(parent_dir, dI))]

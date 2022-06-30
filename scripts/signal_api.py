@@ -1,63 +1,15 @@
-# This file is used for prcessing signal information. It has methods for
-# reading signal information from mit-bih dataset and plotting hearbeats.
-
-import pandas as pd
 import os
+import re
 import wfdb
-from wfdb import processing  # not importing processing
 import matplotlib.pyplot as plt
 from PIL import Image
-import directory_structure
-import re
-
-# number of heartbeats to extract
-NUM_HEARTBEATS_TO_EXTRACT = 1
-BEAT_START_OFFSET = 100
-BEAT_END_OFFSET = 100
 
 
-def takeAllInputs():
-    '''
-    function which takes input from user to display the waveform of the file selected 
-
-    Returns:
-            file_path (str): the location of file that needs to be displayed
-
-            sample_from (int): start index of sample
-
-            sample_to (int): end index of sample
-    '''
-    try:
-        file_path = input('\nWhat file do want to display \n')
-        sample_from = input('\nWhere do you want the sample to start \n')
-        sample_to = input('\nWhere do you want the sample to end \n')
-
-        return str(file_path), int(sample_from), int(sample_to)
-    except:
-        print(
-            "Error please try again (Check if the name you're entering is in the database)")
+import utils
+from constants import BEAT_WRITE_DIR, BEAT_END_OFFSET, BEAT_START_OFFSET
 
 
-def calculateHeartRate(sample_to, xqrs, fs):
-    '''
-    Calculates the heart rate of signal uptil the point specified
-
-    Args:
-            sample_to (int): end sample of signal
-
-            xqrs (signal): used for qrs detection
-
-            fs (int): frequency of signal
-
-    Returns:
-            heart_rate (int): heart beat of person
-    '''
-    heart_rate_list = processing.compute_hr(sample_to, xqrs.qrs_inds, fs)
-    heart_rate = heart_rate_list[-1]
-    return heart_rate
-
-
-def getSignalInfo(file_path, sample_from, sample_to):
+def get_signal_info(file_path, sample_from, sample_to):
     '''
     Reads the signal and its fields
 
@@ -79,7 +31,7 @@ def getSignalInfo(file_path, sample_from, sample_to):
     return signal, fields
 
 
-def writeSingleBeat(file_path, beat_start, beat_end, beat_number, beat_type):
+def write_single_beat(file_path, beat_start, beat_end, beat_number, beat_type):
     '''
     Plots the single beat of a signal
 
@@ -96,50 +48,46 @@ def writeSingleBeat(file_path, beat_start, beat_end, beat_number, beat_type):
     '''
 
     # save directory where beats need to be written
-    beat_wr_dir = directory_structure.getWriteDirectory(
-        'beat_write_dir', beat_type)
-    print("Beat type: ", beat_type)
+    beat_wr_dir = utils.get_write_dir(BEAT_WRITE_DIR, beat_type)
 
     # get signal and fields of specified file_path
-    signal, fields = getSignalInfo(file_path, beat_start, beat_end)
+    signal, _ = get_signal_info(file_path, beat_start, beat_end)
 
     # plot beat
-    saveSignal(signal, beat_number, beat_wr_dir, file_path)
+    save_signal(signal, beat_number, beat_wr_dir, file_path)
 
 
-def saveSignal(signal, beat_number, wr_dir, file_path):
+def save_signal(signal, beat_number, wr_dir, file_path):
     '''
     Plots and saves signal passed in current directory passed
 
     Args:	
-                    signal (list): list of intensity values of signal to be plotted
+        signal (list): list of intensity values of signal to be plotted
 
-                    beat_number (int): the index of what beat is currently being plotted
+        beat_number (int): the index of what beat is currently being plotted
 
-                    wr_dir (str): directory to where beat needs to be written
+        wr_dir (str): directory to where beat needs to be written
 
-                    file_path (str): the location of file to plot
+        file_path (str): the location of file to plot
     '''
-    file_number = (getNumbersFromString(file_path))[0]
+    file_number = (get_num_from_string(file_path))[0]
 
     # plot color signal and save
     plt.plot(signal)
     plt.axis('off')
-    plt.savefig(wr_dir + '/image_' + file_number +
-                '_' + str(beat_number), dpi=125)
+    img_name = 'image_' + file_number + '_' + str(beat_number)
+    plt.savefig(os.path.join(wr_dir, img_name), dpi=125)
 
     # convert grayscale and overwrite
-    img = Image.open(wr_dir + '/image_' + file_number + '_' +
-                     str(beat_number) + '.png').convert('LA')
+    img = Image.open(os.path.join(wr_dir, img_name + '.png')).convert('LA')
     img = img.resize((224, 224))
-    img.save(wr_dir + '/image_' + file_number +
-             '_' + str(beat_number) + '.png')
+    img.save(os.path.join(wr_dir, img_name + '.png'))
 
     # clear plot before next plot
     plt.clf()
 
 
-def getNumbersFromString(string):
+def get_num_from_string(string):
     '''
     Takes a string and gets all the ints from that string
 
@@ -152,59 +100,7 @@ def getNumbersFromString(string):
     return (re.findall(r'\d+', string))
 
 
-def plotSignal(file_path, sample_from, sample_to):
-    '''
-    plots the entire signal of specified file number
-
-    Args:
-            file_path (str): the location of file that needs to be displayed
-
-            sample_from (int): start index of sample
-
-            sample_to (int): end index of sample
-    '''
-    # make signal for file specified by user
-    signal, fields = getSignalInfo(file_path, sample_from, sample_to)
-
-    xqrs = getXQRS(signal, fields)
-
-    # plot waveforms
-    wfdb.plot_items(signal=signal, ann_samp=[
-                    xqrs.qrs_inds], title='Signal ' + file_path + ' from MIT-BIH Arrhythmia Database')
-
-
-def getXQRS(signal, fields):
-    '''
-    The qrs detector class for the xqrs algorithm
-
-    Args:
-                    signal (list): y values of signal samples
-
-                    fields (list): properties of signal
-
-    Returns:
-                    xqrs (XQRS object): used to plot signals 
-    '''
-    # QRS Detection
-    xqrs = processing.XQRS(sig=signal[:, 0], fs=fields['fs'])
-    xqrs.detect(verbose=True)
-    return xqrs
-
-
-def getQRSLocations(file_path):
-    '''
-    get numpy list of QRS Locations
-
-    Returns:
-                    qrs_locs (numpy list): list of QRS locations in the signal
-
-    '''
-    record = wfdb.rdrecord(file_path, channels=[0])
-    qrs_locs = processing.gqrs_detect(record.p_signal[:, 0], fs=record.fs)
-    return qrs_locs
-
-
-def extractBeatsFromPatient(file_path, ann):
+def extract_beats(file_path, ann):
     '''
     finds qrs complexes in specified patient file and save the resulting
     signals in the form of png images in the image write directory (beat_wr_dir)
@@ -222,7 +118,7 @@ def extractBeatsFromPatient(file_path, ann):
     NUM_HEARTBEATS_TO_EXTRACT = len(ann_locs) - 1
 
     # get path where beats need to be written
-    beat_wr_dir = directory_structure.getWriteDirectory('beat_write_dir', None)
+    os.makedirs(BEAT_WRITE_DIR, exist_ok=True)
 
     # plot and save the beats in the range selected
     for beat_number in range(NUM_HEARTBEATS_TO_EXTRACT):
@@ -230,5 +126,5 @@ def extractBeatsFromPatient(file_path, ann):
         beat_end = ann_locs[beat_number + 1] - BEAT_END_OFFSET
         beat_type = ann.symbol[beat_number]
 
-        writeSingleBeat(file_path, beat_start, beat_end,
-                        beat_number, beat_type)
+        write_single_beat(file_path, beat_start, beat_end,
+                          beat_number, beat_type)

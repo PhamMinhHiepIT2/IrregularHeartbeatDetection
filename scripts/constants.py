@@ -25,3 +25,12 @@ IMAGES_TO_TRAIN = 5000
 
 # Model path
 MODEL_PATH = "models/vgg16-on.h5"
+
+
+SIGNAL_DIR = "data/waveform"
+BEAT_WRITE_DIR = 'data/beats'
+
+# number of heartbeats to extract
+NUM_HEARTBEATS_TO_EXTRACT = 1
+BEAT_START_OFFSET = 100
+BEAT_END_OFFSET = 100

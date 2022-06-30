@@ -9,10 +9,8 @@ import re
 def chooseDirectoryFromRoot(directory):
     '''
     take directory to go to from the root directory of project 
-
     Args:
             directory (str): name of directory user wants to go to
-
     '''
     # go to root directory of project from current directory
     os.chdir("..")
@@ -88,21 +86,6 @@ def getWriteDirectory(directory_name, subdirectory_name):
     else:
         # return directory specified
         return wr_dir
-
-
-def getReadDirectory(directory_name):
-    '''
-    get the path of passed in directory name from root of project
-
-    Args:
-            directory_name (str): name of directory to read from
-
-    Returns:
-            rd_dir (str): path of directory to read data from
-    '''
-
-    rd_dir = os.getcwd() + '/../' + directory_name + '/'
-    return rd_dir
 
 
 def extractNumFromFile(file_name):

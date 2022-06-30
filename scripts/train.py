@@ -1,7 +1,6 @@
 import os
 
-
-from models import Model, Resnet, VGG
+from model import ClassificationModel, Resnet, VGG
 from utils import getSignalDataFrame, trainAndTestSplit
 from constants import (
     RESNET50_WEIGHT,
@@ -20,7 +19,7 @@ from constants import (
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
 
-def train_model(model: Model, X_train, y_train, X_test, y_test, batch_size, epochs, callbacks, metrics_name, model_name):
+def train_model(model: ClassificationModel, X_train, y_train, X_test, y_test, batch_size, epochs, callbacks, metrics_name, model_name):
     '''
         train model with given data
 
@@ -38,8 +37,8 @@ def train_model(model: Model, X_train, y_train, X_test, y_test, batch_size, epoc
               callbacks=callbacks)
 
     score = model.evaluate(X_test, y_test)
-    model.printTestMetrics(score)
-    model.saveMetricsAndWeights(score, model, metrics_name, model_name)
+    model.print_test_metrics(score)
+    model.save_metrics_and_weight(score, model, metrics_name, model_name)
 
 
 def train_resnet50(X_train, y_train, X_test, y_test, batch_size, epochs, metrics_name=RESNET50_METRICS, model_name=RESNET50_WEIGHT):

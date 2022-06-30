@@ -11,7 +11,7 @@ from keras.callbacks import ModelCheckpoint, EarlyStopping, TensorBoard
 from constants import WEIGHT_FOLDER, METRICS_FOLDER
 
 
-class Model:
+class ClassificationModel:
     def __init__(self, num_classes, weight='imagenet', image_weight=224, image_height=224, output_folder="../models", graph_folder="../graphs"):
         self.output_folder = output_folder
         self.graph_folder = graph_folder
@@ -70,7 +70,7 @@ class Model:
 
         return model_final
 
-    def printTestMetrics(self, score):
+    def print_test_metrics(self, score):
         '''
         print prediction score
 
@@ -82,7 +82,7 @@ class Model:
         print('Test accuracy:', score[1])
 
     
-    def saveMetricsAndWeights(self, score, model, metric_name, model_name):
+    def save_metrics_and_weight(self, score, model, metric_name, model_name):
         '''
         Save metric and weight data in specific folders
 
@@ -113,7 +113,7 @@ class Model:
                     str((current_acc - highest_acc)*100) + '%')
 
 
-class Resnet(Model):
+class Resnet(ClassificationModel):
     def __init__(self, num_classes, weight='imagenet', image_weight=224, image_height=224, output_folder="../models", graph_folder="../graphs") -> None:
         super().__init__(num_classes, weight, image_weight,
                          image_height, output_folder, graph_folder)
@@ -151,7 +151,7 @@ class Resnet(Model):
         return model
 
 
-class VGG(Model):
+class VGG(ClassificationModel):
     def __init__(self, num_classes, weight='imagenet', image_weight=224, image_height=224, output_folder="../models", graph_folder="../graphs") -> None:
         super().__init__(num_classes, weight, image_weight,
                          image_height, output_folder, graph_folder)
