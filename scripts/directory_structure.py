@@ -73,12 +73,12 @@ def getWriteDirectory(directory_name, subdirectory_name):
     '''
 
     if subdirectory_name is None:
-        wr_dir = os.getcwd() + '/../../' + directory_name + '/'
+        wr_dir = os.getcwd() + '/../' + directory_name + '/'
     else:
         if subdirectory_name == '/':
-            wr_dir = os.getcwd() + '/../../' + directory_name + '/' + '_' + '/'
+            wr_dir = os.getcwd() + '/../' + directory_name + '/' + '_' + '/'
         else:
-            wr_dir = os.getcwd() + '/../../' + directory_name + \
+            wr_dir = os.getcwd() + '/../' + directory_name + \
                 '/' + subdirectory_name + '/'
     print(wr_dir)
     # if dir does not exist make new one

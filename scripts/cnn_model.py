@@ -200,6 +200,32 @@ def trainAndTestSplit(df, size_of_test_data):
     return X_train, X_test, y_train, y_test
 
 
+def saveSplitDataframe(X, y):
+    split_folder = "train_test"
+    mapping_classes = {
+        0: CLASSES_TO_CHECK[0],
+        1: CLASSES_TO_CHECK[1],
+        2: CLASSES_TO_CHECK[2],
+        3: CLASSES_TO_CHECK[3],
+        4: CLASSES_TO_CHECK[4]
+    }
+    data_length = len(X)
+    if data_length != len(y):
+        raise Exception("Data does not match with label!!!")
+    for index in data_length:
+        data = X[index]
+        label = mapping_classes[y[index]]
+        img_folder = os.path.join(split_folder, label)
+        os.makedirs(img_folder, exist_ok=True)
+        img_path = os.path.join(img_folder, label + str(index) + '.png')
+        try:
+            cv2.imwrite(data, img_path)
+        except Exception as e:
+            print(f"Cannot save image with index {index}, class {label}")
+            print(e)
+
+
+
 def printTestMetrics(score):
     '''
     print prediction score
@@ -389,6 +415,10 @@ if __name__ == '__main__':
 
     X_train, X_test, y_train, y_test = trainAndTestSplit(df, 0.2)
 
+    # save train and test image
+    saveSplitDataframe(X_train, y_train)
+
+    saveSplitDataframe(X_test, y_test)
     # (3) CREATE SEQUENTIAL MODEL
     # model = createModel('Novelnet')
 
