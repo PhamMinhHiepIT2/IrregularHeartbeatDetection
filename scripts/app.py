@@ -5,6 +5,8 @@ import cv2
 
 MODEL_PATH = "model/vgg16.h5"
 app = FastAPI()
+image_folder = "/home/hieppm/hieppm/beat_write_dir"
+
 
 CLASSES_TO_CHECK = ['L', 'N', 'V', 'A', 'R']
 description = {
@@ -47,6 +49,17 @@ def predict(model, image):
     return return_val
 
 
+def test_predict(img_folder: str):
+    import os
+    model_path = "/home/hieppm/hieppm/testing/model_weights/vgg16.h5"
+    model = load_model(model_path)
+    for img in os.listdir(img_folder):
+        img_path = os.path.join(img_folder, img)
+
+        predict_res = predict(model, img_path)
+        print(predict_res)
+
+
 @app.get("/")
 def image_pred(image_path):
     model = load_model(MODEL_PATH)
@@ -54,4 +67,6 @@ def image_pred(image_path):
 
 
 if __name__ == "__main__":
-    uvicorn.run("app:app", host="0.0.0.0", port=8000, reload=True)
+    # uvicorn.run("app:app", host="0.0.0.0", port=8000, reload=True)
+    img_folder = ""
+    test_predict("/home/hieppm/hieppm/beat_write_dir/R")

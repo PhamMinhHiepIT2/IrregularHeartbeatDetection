@@ -2,6 +2,7 @@
 # https://www.mydatahack.com/building-alexnet-with-keras/
 # script that reads data, creates model and trains it
 
+from time import sleep
 from keras.models import Sequential
 from keras.layers import Dense, Activation, Dropout, Flatten,\
     Conv2D, MaxPooling2D
@@ -16,12 +17,12 @@ import keras
 from collections import deque
 from keras.callbacks import EarlyStopping, ReduceLROnPlateau, ModelCheckpoint
 import tensorflow as tf
-import resnet50
+import models
 
 # classes model needs to learn to classify
 CLASSES_TO_CHECK = ['L', 'N', 'V', 'A', 'R']
 NUMBER_OF_CLASSES = len(CLASSES_TO_CHECK)
-IMAGES_TO_TRAIN = 5000
+IMAGES_TO_TRAIN = 2544  # total number images in class A
 
 # removing warning for tensorflow about AVX support
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
@@ -72,12 +73,14 @@ def getSignalDataFrame():
         '''
     # get paths for where signals are present
     signal_path = directory_structure.getWriteDirectory('beat_write_dir', None)
+    print(f"Signal path: {signal_path}")
 
     # create dataframe
     df = pd.DataFrame(columns=['Signal ID', 'Signal', 'Type'])
 
     arrhythmia_classes = directory_structure.getAllSubfoldersOfFolder(
         signal_path)
+    print(f"arrhythmia classes: {arrhythmia_classes}")
 
     image_paths = deque()
     image_ids = deque()
@@ -87,8 +90,11 @@ def getSignalDataFrame():
     # get path for each image in classification folders
     for classification in arrhythmia_classes:
         classification_path = ''.join([signal_path, classification])
+        print(f"Classification path: {classification_path}")
         image_list = directory_structure.filesInDirectory(
             '.png', classification_path)
+        print(
+            "length of images in class {} is {}".format(classification_path, len(image_list)))
         for beat_id in image_list:
             image_ids.append(directory_structure.removeFileExtension(beat_id))
             class_types.append(classification)
@@ -97,6 +103,8 @@ def getSignalDataFrame():
     # read and save images in dataframe
     for path in image_paths:
         images.append(cv2.imread(path))
+
+    print(f"Class type: {class_types}")
 
     # save information in dataframe
     df['Signal ID'] = image_ids
@@ -154,7 +162,7 @@ def trainAndTestSplit(df, size_of_test_data):
         y_test (list): list of testing classes
         '''
     image_count = 0
-    classes_to_check = CLASSES_TO_CHECK
+    classes_to_check = CLASSES_TO_CHECK.copy()
     images_available_in_class = IMAGES_TO_TRAIN
 
     # train + test data (signals and classes of signals respectively)
@@ -167,7 +175,8 @@ def trainAndTestSplit(df, size_of_test_data):
             images_available_in_class = df['Type'].value_counts()[row['Type']]
 
             X.append(row['Signal'])
-            y.append(classes_to_check.index(row['Type']))
+            y.append(CLASSES_TO_CHECK.index(str(row['Type'])))
+
             image_count += 1
 
             if images_available_in_class < IMAGES_TO_TRAIN:
@@ -383,71 +392,22 @@ def createModel(model_name):
 
 
 if __name__ == '__main__':
+    from utils import save_train_test_data
 
     # (2) GET DATA
     df = getSignalDataFrame()
 
     X_train, X_test, y_train, y_test = trainAndTestSplit(df, 0.2)
 
-    # (3) CREATE SEQUENTIAL MODEL
-    # model = createModel('Novelnet')
-
-    # # uncomment to do computation on multiple gpus
-    # # parallel_model = multi_gpu_model(model, gpus=2)
-    # parallel_model = model
-
-    # # (4) COMPILE MODEL
-    # parallel_model.compile(
-    #     loss='categorical_crossentropy',
-    #     optimizer='adam',
-    #     metrics=['accuracy']
-    # )
-
-    # callback = EarlyStopping(monitor='val_loss', patience=3)
-    # reduce_lr_loss = ReduceLROnPlateau(
-    #     patience=7, verbose=0, epsilon=1e-4, mode='min')
-    # model_ckp = ModelCheckpoint("model.h5", save_best_only=True, mode='min')
-
-    # # (5) TRAIN
-    # history = parallel_model.fit(
-    #     X_train,
-    #     y_train,
-    #     batch_size=64,
-    #     epochs=30,
-    #     verbose=1,
-    #     validation_data=(X_test, y_test),
-    #     shuffle=True,
-    #     callbacks=[callback, reduce_lr_loss, model_ckp],
-    #     use_multiprocessing=True
-    # )
-
-    # # (6) PREDICTION
-    # predictions = parallel_model.predict(X_test)
-    # score = parallel_model.evaluate(X_test, y_test, verbose=0)
-
-    # printTestMetrics(score)
-
-    # # (7) SAVE TESTS + WEIGHTS
-    # saveMetricsAndWeights(score, parallel_model)
-
-    # resnet50_model = resnet50.resnet50(
-    #     X_train, y_train, X_test, y_test, batch_size=64, epochs=20, num_classes=5, output_file="resnet50.h5")
-
-    # RESNET152 model
-    # resnet152_model = resnet50.resnet152(
-    #     X_train, y_train, X_test, y_test, batch_size=64, epochs=20, num_classes=5, output_file="resnet152.h5")
-
-    # predictions = resnet152_model.predict(X_test)
-    # score = resnet152_model.evaluate(X_test, y_test, verbose=0)
-
-    # printTestMetrics(score)
-
-    # saveMetricsAndWeights(score, resnet152_model,
-    #                       "resnet152.npy", "resnet152.h5")
+    # save train data from dataframe to image
+    save_train_test_data(X_train, y_train, data_type="train")
+    # save test data from dataframe to image
+    save_train_test_data(X_test, y_test, data_type="test")
 
     # VGG16 model
 
-    vgg16_model = resnet50.vgg16(
+    print("Training VGG16 model")
+    vgg16_model = models.vgg16(
         X_train, y_train, X_test, y_test, batch_size=64, epochs=20, num_classes=5, output_file="resnet152.h5")
 
     predictions = vgg16_model.predict(X_test)
@@ -458,7 +418,8 @@ if __name__ == '__main__':
     saveMetricsAndWeights(score, vgg16_model, "vgg16.npy", "vgg16.h5")
 
     # VGG19 model
-    vgg19_model = resnet50.vgg19(
+    print("Training VGG16 model")
+    vgg19_model = models.vgg19(
         X_train, y_train, X_test, y_test, batch_size=64, epochs=20, num_classes=5, output_file="resnet152.h5")
 
     predictions = vgg19_model.predict(X_test)
